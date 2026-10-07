@@ -32,39 +32,58 @@ function reset() {
 </script>
 
 <template>
-  <div class="toolbar">
-    <input v-model="search" type="search" placeholder="Search title, description, location…" aria-label="Search" />
+  <div class="card toolbar">
+    <input v-model="search" class="search" type="search" placeholder="Search title, description, location…" aria-label="Search" />
 
-    <fieldset>
-      <legend>Severity</legend>
-      <label v-for="s in severities" :key="s" class="chip">
-        <input type="checkbox" :checked="query.severity.includes(s)" @change="update({ severity: toggle(query.severity, s) })" />
-        {{ s }}
-      </label>
-    </fieldset>
+    <div class="filters">
+      <div class="group">
+        <span class="group-label">Severity</span>
+        <button
+          v-for="s in severities"
+          :key="s"
+          type="button"
+          class="chip"
+          :class="{ active: query.severity.includes(s) }"
+          :aria-pressed="query.severity.includes(s)"
+          @click="update({ severity: toggle(query.severity, s) })"
+        >
+          {{ s }}
+        </button>
+      </div>
+      <div class="group">
+        <span class="group-label">Status</span>
+        <button
+          v-for="s in statuses"
+          :key="s"
+          type="button"
+          class="chip"
+          :class="{ active: query.status.includes(s) }"
+          :aria-pressed="query.status.includes(s)"
+          @click="update({ status: toggle(query.status, s) })"
+        >
+          {{ s.replace('_', ' ') }}
+        </button>
+      </div>
+    </div>
 
-    <fieldset>
-      <legend>Status</legend>
-      <label v-for="s in statuses" :key="s" class="chip">
-        <input type="checkbox" :checked="query.status.includes(s)" @change="update({ status: toggle(query.status, s) })" />
-        {{ s.replace('_', ' ') }}
-      </label>
-    </fieldset>
-
-    <div class="controls">
-      <label>
-        Sort by
-        <select :value="query.sort" @change="update({ sort: ($event.target as HTMLSelectElement).value as CfrQuery['sort'] })">
-          <option v-for="k in sortKeys" :key="k" :value="k">{{ k.replace('_', ' ') }}</option>
-        </select>
-      </label>
-      <button type="button" @click="update({ order: query.order === 'asc' ? 'desc' : 'asc' })">
-        {{ query.order === 'asc' ? '↑ Asc' : '↓ Desc' }}
-      </button>
-      <button type="button" @click="reset">Clear filters</button>
-      <button type="button" :disabled="exporting" @click="emit('export')">
-        {{ exporting ? 'Exporting…' : 'Export PDF' }}
-      </button>
+    <div class="actions">
+      <div class="sort">
+        <label class="inline">
+          Sort by
+          <select :value="query.sort" @change="update({ sort: ($event.target as HTMLSelectElement).value as CfrQuery['sort'] })">
+            <option v-for="k in sortKeys" :key="k" :value="k">{{ k.replace('_', ' ') }}</option>
+          </select>
+        </label>
+        <button type="button" class="btn" @click="update({ order: query.order === 'asc' ? 'desc' : 'asc' })">
+          {{ query.order === 'asc' ? '↑ Asc' : '↓ Desc' }}
+        </button>
+      </div>
+      <div class="sort">
+        <button type="button" class="btn ghost" @click="reset">Clear filters</button>
+        <button type="button" class="btn primary" :disabled="exporting" @click="emit('export')">
+          {{ exporting ? 'Exporting…' : 'Export PDF' }}
+        </button>
+      </div>
     </div>
   </div>
 </template>

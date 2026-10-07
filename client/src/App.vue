@@ -19,16 +19,17 @@ const exporting = ref(false);
 let controller: AbortController | undefined;
 async function load() {
   controller?.abort();
-  controller = new AbortController();
+  const ctl = (controller = new AbortController());
   loading.value = true;
   try {
-    result.value = await listCfrs(query.value, controller.signal);
+    result.value = await listCfrs(query.value, ctl.signal);
     error.value = '';
   } catch (e) {
     if ((e as Error).name === 'AbortError') return;
     error.value = e instanceof Error ? e.message : 'Failed to load reports';
   } finally {
-    if (!controller.signal.aborted) loading.value = false;
+    // Use this call's own controller: an aborted call must not clear the newer call's spinner.
+    if (!ctl.signal.aborted) loading.value = false;
   }
 }
 
@@ -58,7 +59,7 @@ async function onExport() {
     <p v-if="error" class="error">{{ error }}</p>
     <div class="layout">
       <CfrForm @created="onCreated" />
-      <div>
+      <div class="main-col">
         <CfrToolbar v-model="query" :exporting="exporting" @export="onExport" />
         <CfrList
           :cfrs="result.items"

@@ -33,7 +33,7 @@ async function submit() {
 </script>
 
 <template>
-  <form @submit.prevent="submit">
+  <form class="card" @submit.prevent="submit">
     <h2>New report</h2>
     <label>Title <input v-model="form.title" required maxlength="200" /></label>
     <label>Location on ship <input v-model="form.location" required maxlength="200" placeholder="e.g. Deck 3, frame 42" /></label>
@@ -45,6 +45,6 @@ async function submit() {
     </label>
     <label>Description <textarea v-model="form.description" rows="4" /></label>
     <p v-if="error" class="error">{{ error }}</p>
-    <button :disabled="submitting">{{ submitting ? 'Saving…' : 'Submit report' }}</button>
+    <button class="btn primary block" :disabled="submitting">{{ submitting ? 'Saving…' : 'Submit report' }}</button>
   </form>
 </template>
