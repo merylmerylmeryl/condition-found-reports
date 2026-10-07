@@ -14,3 +14,15 @@ li { border-top: 1px solid #e3e7ec; padding: .75rem 0; }
 .badge { padding: 0 .5rem; border-radius: 99px; font-size: .75rem; line-height: 1.5rem; color: #fff; text-transform: uppercase; }
 .badge.low { background: #4a8f4a; } .badge.medium { background: #b58900; }
 .badge.high { background: #d9731a; } .badge.critical { background: #c62828; }
+.toolbar { background: #fff; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px #0002; margin-bottom: 1rem; }
+.toolbar > input[type='search'] { margin: 0 0 .75rem; }
+fieldset { border: 0; padding: 0; margin: 0 0 .5rem; display: flex; flex-wrap: wrap; gap: .25rem .75rem; align-items: center; }
+legend { float: left; font-size: .8rem; color: #5b6675; margin-right: .5rem; padding: 0; }
+.chip { display: inline-flex; align-items: center; gap: .25rem; margin: 0; }
+.chip input { width: auto; margin: 0; display: inline; }
+.controls { display: flex; flex-wrap: wrap; gap: .5rem; align-items: end; }
+.controls label { margin: 0; }
+.pager { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; justify-content: center; margin-top: 1rem; }
+.pager label { margin: 0; display: flex; align-items: center; gap: .5rem; }
+.pager select { width: auto; margin: 0; }
+section.loading ul { opacity: .5; }
