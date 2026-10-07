@@ -1,0 +1,22 @@
+# Only Postgres runs in Docker. The API and Vite dev server run on the host for fast
+# reload/debugging; containerizing them is a deploy concern, not a dev-loop one.
+services:
+  db:
+    image: postgres:16-alpine
+    # Credentials come from the root .env (gitignored); compose reads it automatically.
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data   # named volume so data survives `down`
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
