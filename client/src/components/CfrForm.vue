@@ -45,6 +45,6 @@ async function submit() {
     </label>
     <label>Description <textarea v-model="form.description" rows="4" /></label>
     <p v-if="error" class="error">{{ error }}</p>
-    <button class="btn primary block" :disabled="submitting">{{ submitting ? 'Saving…' : 'Submit report' }}</button>
+    <button class="btn primary block" :disabled="submitting">{{ submitting ? 'Saving & analyzing…' : 'Submit report' }}</button>
   </form>
 </template>

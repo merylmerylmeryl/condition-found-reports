@@ -5,6 +5,17 @@ export type Severity = (typeof severities)[number];
 export const statuses = ['open', 'in_progress', 'resolved', 'closed'] as const;
 export type Status = (typeof statuses)[number];
 
+export const categories = ['structural', 'electrical', 'piping', 'corrosion', 'safety', 'mechanical', 'other'] as const;
+
+// Advisory output from the model. Kept separate from the reporter's own `severity`, which
+// stays the source of truth; null when AI was unavailable or failed for this report.
+export interface AiSuggestion {
+  severity: Severity;
+  category: (typeof categories)[number];
+  summary: string;
+  model: string;
+}
+
 export interface Cfr {
   id: string;
   title: string;
@@ -13,10 +24,11 @@ export interface Cfr {
   severity: Severity;
   status: Status;
   created_at: string; // ISO 8601, assigned by the server
+  ai_suggestion: AiSuggestion | null;
 }
 
 // What the client sends: no created_at (server-owned), but it does supply the id.
-export type NewCfr = Omit<Cfr, 'created_at' | 'status'>;
+export type NewCfr = Omit<Cfr, 'created_at' | 'status' | 'ai_suggestion'>;
 
 
 export const sortKeys = ['created_at', 'title', 'location', 'severity', 'status'] as const;

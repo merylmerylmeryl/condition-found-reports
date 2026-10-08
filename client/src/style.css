@@ -80,3 +80,10 @@ li { border-top: 1px solid var(--border); padding: .85rem 0; }
 .gap { color: var(--muted); padding: 0 .2rem; }
 .per-page { display: flex; align-items: center; gap: .5rem; margin: 0; }
 .per-page select { width: auto; margin: 0; padding-top: .4rem; padding-bottom: .4rem; border-radius: var(--radius-pill); }
+
+/* AI suggestion: visually secondary (dashed, tinted) so it reads as advice, not as the record */
+.ai { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .6rem; margin-top: .6rem; padding: .5rem .75rem; background: var(--accent-soft); border: 1px dashed #9db6f0; border-radius: var(--radius); font-size: .85rem; }
+.ai-label { font-weight: 600; font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; color: var(--accent); }
+.ai-category { padding: .05rem .6rem; border: 1px solid #9db6f0; border-radius: var(--radius-pill); color: var(--accent); background: #fff; }
+.ai-diff { font-size: .75rem; color: #b45309; background: #fef3c7; padding: .05rem .5rem; border-radius: var(--radius-pill); }
+.ai-summary { flex-basis: 100%; color: var(--text); }

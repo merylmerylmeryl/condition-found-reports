@@ -48,6 +48,15 @@ watch(
         </div>
         <div class="meta">{{ c.location }} · {{ c.status.replace('_', ' ') }} · {{ fmt(c.created_at) }}</div>
         <p v-if="c.description" class="desc">{{ c.description }}</p>
+        <!-- Shown beside, never instead of, the reporter's values. Rendered with {{ }} (escaped text),
+             since the summary derives from user-written text. -->
+        <div v-if="c.ai_suggestion" class="ai">
+          <span class="ai-label">AI suggestion</span>
+          <span :class="['badge', c.ai_suggestion.severity]">{{ c.ai_suggestion.severity }}</span>
+          <span class="ai-category">{{ c.ai_suggestion.category }}</span>
+          <span v-if="c.ai_suggestion.severity !== c.severity" class="ai-diff" title="The AI's severity differs from the severity you chose">differs from reported</span>
+          <span class="ai-summary">{{ c.ai_suggestion.summary }}</span>
+        </div>
       </li>
     </ul>
 
