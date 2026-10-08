@@ -8,6 +8,7 @@ interface Row {
   severity: string;
   status: string;
   created_at: Date;
+  ai_suggestion: { severity: string; category: string; summary: string } | null;
 }
 
 // Streams straight into the HTTP response, so memory stays flat even for thousands of rows.
@@ -40,6 +41,10 @@ export function writeCfrPdf(rows: Row[], out: Writable) {
       )
       .fillColor('#000');
     if (r.description) doc.fontSize(10).text(r.description);
+    if (r.ai_suggestion) {
+      const a = r.ai_suggestion;
+      doc.fontSize(9).fillColor('#2459d6').text(`AI suggestion: ${a.severity} · ${a.category} · ${a.summary}`).fillColor('#000');
+    }
     doc.moveDown(0.8);
   }
 

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { pool } from '../db.js';
+import { suggestForCfr, AI_MODEL } from '../ai/suggest.js';
 import { writeCfrPdf } from '../pdf.js';
 
 // Validate at the boundary with zod: the DB CHECKs are the last line of defense, but
@@ -19,7 +20,13 @@ const createSchema = z.object({
 
 // API says `location`; the column is `ship_location` ("location" is vague in SQL).
 // Aliasing in SELECT keeps that mapping in one place.
-const COLUMNS = 'id, title, description, ship_location AS location, severity, status, created_at';
+// ai_suggestion is built in SQL so the list, create and PDF paths all return the same shape:
+// null when there are no suggestions, otherwise one nested object (the columns are
+// all-or-nothing by constraint, so checking ai_model is enough).
+const COLUMNS = `id, title, description, ship_location AS location, severity, status, created_at,
+  CASE WHEN ai_model IS NULL THEN NULL
+       ELSE json_build_object('severity', ai_severity, 'category', ai_category, 'summary', ai_summary, 'model', ai_model)
+  END AS ai_suggestion`;
 
 // Sort keys are mapped to SQL here and never interpolated from user input, so the
 // ORDER BY can't be used for injection. Severity sorts by rank, not alphabetically
@@ -91,13 +98,29 @@ cfrsRouter.post('/', async (req, res, next) => {
   }
   const c = parsed.data;
   try {
+    // A client retry reuses its id. Check first so a duplicate gets its 409 without paying for
+    // (and waiting on) another model call. The INSERT's primary key still decides races.
+    const dup = await pool.query('SELECT 1 FROM cfrs WHERE id = $1', [c.id]);
+    if (dup.rowCount) {
+      res.status(409).json({ error: 'id_already_exists' });
+      return;
+    }
+    // Enrich BEFORE inserting so the row is written once, complete (no UPDATE, no half-filled
+    // state, nothing for the UI to poll). suggestForCfr never throws and is time-boxed, so the
+    // worst case is "saved without suggestions" after a bounded delay.
+    // Trade-off: POST latency now includes the model call. If that mattered, the alternative is
+    // INSERT first, then enrich from a queue/worker, at the cost of retries, polling and a
+    // partially-filled window.
+    const ai = await suggestForCfr(c);
     // Parameterized query ($n placeholders) -> no SQL injection.
     // created_at is intentionally not accepted from the client; the DB assigns it.
     const { rows } = await pool.query(
-      `INSERT INTO cfrs (id, title, description, ship_location, severity, status)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO cfrs (id, title, description, ship_location, severity, status,
+                         ai_severity, ai_category, ai_summary, ai_model)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        RETURNING ${COLUMNS}`,
-      [c.id, c.title, c.description, c.location, c.severity, c.status],
+      [c.id, c.title, c.description, c.location, c.severity, c.status,
+       ai?.severity ?? null, ai?.category ?? null, ai?.summary ?? null, ai ? AI_MODEL : null],
     );
     res.status(201).json(rows[0]);
   } catch (err) {
